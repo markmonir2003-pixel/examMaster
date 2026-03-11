@@ -6,536 +6,577 @@ export const generateStandalonHTML = (exam: Exam): string => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${exam.title} - Exam</title>
+  <title>${exam.title} - ExamMaster Interactive</title>
   <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --error: #ef4444;
+      --error-light: #fef2f2;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --radius: 20px;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
       min-height: 100vh;
-      padding: 20px;
     }
 
     .container {
+      width: 100%;
       max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background: var(--bg-card);
+      border-radius: 32px;
+      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
+    /* ---- Header & Nav ---- */
     .header {
-      padding: 40px;
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      color: white;
-      text-align: center;
+      padding: 40px 40px 30px;
+      background: var(--bg-card);
+      border-bottom: 2px solid var(--border);
+      position: relative;
     }
 
-    .header h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: var(--primary);
     }
 
-    .header p {
-      opacity: 0.9;
-      font-size: 14px;
+    .exam-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 12px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
     }
 
+    .exam-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+    
+    .progress-bar-container {
+       width: 100%;
+       height: 6px;
+       background: var(--border);
+       overflow: hidden;
+    }
+    .progress-bar {
+       height: 100%;
+       background: var(--primary);
+       width: 0%;
+       transition: width 0.3s ease;
+    }
+
+    /* ---- Content Area ---- */
     .content {
       padding: 40px;
     }
 
-    .student-info {
-      margin-bottom: 30px;
-      padding: 20px;
-      background: #f9fafb;
-      border-radius: 6px;
+    /* Screens */
+    .screen {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .screen.active {
+      display: block;
     }
 
-    .student-info label {
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Input Screen */
+    .input-group {
+      margin-bottom: 30px;
+    }
+    .input-group label {
       display: block;
       font-size: 14px;
-      color: #6b7280;
-      margin-bottom: 6px;
-      font-weight: 500;
-    }
-
-    .student-info input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 4px;
-      font-size: 14px;
-      font-family: inherit;
-    }
-
-    .questions {
-      margin-top: 40px;
-    }
-
-    .question-card {
-      margin-bottom: 30px;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-
-    .question-header {
-      padding: 16px 20px;
-      background: #f3f4f6;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .question-number {
-      display: inline-block;
-      font-size: 12px;
       font-weight: 600;
-      color: #6b7280;
+      color: var(--text-muted);
       margin-bottom: 8px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 16px;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-group input:focus {
+      border-color: var(--primary);
+    }
+
+    /* Question Screen */
+    .question-nav-info {
+       display: flex;
+       align-items: center;
+       justify-content: space-between;
+       margin-bottom: 24px;
+       font-weight: 600;
+       color: var(--primary);
+    }
+
+    .question-bento {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      margin-bottom: 30px;
     }
 
     .question-text {
-      font-size: 16px;
-      font-weight: 500;
-      color: #111827;
-      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 24px;
+      line-height: 1.4;
     }
 
-    .question-type {
-      display: inline-block;
-      font-size: 11px;
-      background: #dbeafe;
-      color: #1e40af;
-      padding: 4px 8px;
-      border-radius: 3px;
-      margin-left: 8px;
+    .options-grid {
+      display: grid;
+      gap: 12px;
     }
 
-    .options {
-      padding: 20px;
-    }
-
-    .option {
-      margin-bottom: 12px;
+    .option-btn {
       display: flex;
       align-items: center;
+      width: 100%;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-main);
       cursor: pointer;
-      padding: 10px;
-      border-radius: 4px;
-      border: 1px solid transparent;
-      transition: all 0.2s;
+      text-align: left;
+      transition: all 0.2s ease;
     }
 
-    .option:hover {
-      background: #f9fafb;
-      border-color: #e5e7eb;
+    .option-btn:hover {
+      background: var(--bg-page);
+      border-color: #cbd5e1;
     }
 
-    .option input[type="radio"] {
-      margin-right: 12px;
-      cursor: pointer;
-      width: 18px;
-      height: 18px;
+    .option-btn.selected {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
     }
 
-    .option label {
-      cursor: pointer;
-      flex: 1;
-      font-size: 14px;
-      color: #374151;
-    }
-
-    .button-group {
+    .option-indicator {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      margin-right: 16px;
       display: flex;
-      gap: 12px;
-      margin-top: 40px;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .option-btn.selected .option-indicator {
+       border-color: var(--primary);
+       background: var(--primary);
+    }
+    .option-btn.selected .option-indicator::after {
+       content: '';
+       width: 8px;
+       height: 8px;
+       background: white;
+       border-radius: 50%;
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn {
+      padding: 16px 32px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
       justify-content: center;
     }
 
-    button {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-
     .btn-primary {
-      background: #3b82f6;
+      background: var(--primary);
       color: white;
     }
-
     .btn-primary:hover {
-      background: #2563eb;
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
     }
-
     .btn-primary:disabled {
-      background: #d1d5db;
+      background: #94a3b8;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
     .btn-secondary {
-      background: white;
-      color: #374151;
-      border: 1px solid #d1d5db;
+      background: var(--bg-page);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
     }
-
     .btn-secondary:hover {
-      background: #f9fafb;
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+    
+    .hidden {
+       display: none !important;
     }
 
-    .progress-container {
-      padding: 20px 40px;
-      background: #f9fafb;
-      border-bottom: 1px solid #e5e7eb;
+    /* Results Screen */
+    .results-hero {
+       text-align: center;
+       padding: 40px 20px;
+       border-radius: 24px;
+       margin-bottom: 30px;
+       border: 2px solid transparent;
+    }
+    .results-hero.pass {
+       background: var(--success-light);
+       border-color: #a7f3d0;
+    }
+    .results-hero.fail {
+       background: var(--error-light);
+       border-color: #fecaca;
+    }
+    
+    .score-percentage {
+       font-size: 72px;
+       font-weight: 900;
+       line-height: 1;
+       margin-bottom: 12px;
+       letter-spacing: -0.05em;
+    }
+    .pass .score-percentage { color: var(--success); }
+    .fail .score-percentage { color: var(--error); }
+    
+    .score-details {
+       font-size: 18px;
+       font-weight: 600;
+       color: var(--text-main);
+    }
+    
+    .review-list {
+       display: flex;
+       flex-direction: column;
+       gap: 16px;
+    }
+    .review-item {
+       padding: 24px;
+       border-radius: 16px;
+       border: 1px solid var(--border);
+       background: var(--bg-page);
+    }
+    .review-item.correct { border-left: 6px solid var(--success); }
+    .review-item.incorrect { border-left: 6px solid var(--error); }
+    
+    .review-q {
+       font-weight: 700;
+       font-size: 16px;
+       margin-bottom: 12px;
+    }
+    .review-ans {
+       font-size: 14px;
+       padding: 12px;
+       border-radius: 8px;
+       background: var(--bg-card);
+       border: 1px solid var(--border);
+       margin-bottom: 8px;
+    }
+    .review-ans.correct-ans {
+       background: var(--success-light);
+       border-color: #a7f3d0;
+       color: #065f46;
+       font-weight: 600;
     }
 
-    .progress-text {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 8px;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 4px;
-      background: #e5e7eb;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: #3b82f6;
-      transition: width 0.3s;
-    }
-
-    .results {
-      display: none;
-    }
-
-    .results.active {
-      display: block;
-    }
-
-    .score-display {
-      text-align: center;
-      padding: 40px;
-      border-radius: 8px;
-      margin: 30px 0;
-      background: #f0fdf4;
-      border: 2px solid #86efac;
-    }
-
-    .score-display.failed {
-      background: #fef2f2;
-      border-color: #fca5a5;
-    }
-
-    .score-number {
-      font-size: 56px;
-      font-weight: bold;
-      color: #22c55e;
-      margin-bottom: 10px;
-    }
-
-    .score-display.failed .score-number {
-      color: #ef4444;
-    }
-
-    .review-section {
-      margin-top: 40px;
-    }
-
-    .review-question {
-      padding: 20px;
-      background: #f9fafb;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      border-left: 4px solid #22c55e;
-    }
-
-    .review-question.incorrect {
-      background: #fef2f2;
-      border-left-color: #ef4444;
-    }
-
-    .review-question-text {
-      font-weight: 500;
-      margin-bottom: 10px;
-      color: #111827;
-    }
-
-    .review-answer {
-      font-size: 14px;
-      margin: 6px 0;
-      color: #374151;
-    }
-
-    .review-answer strong {
-      color: #111827;
+    @media print {
+      body { padding: 0; background: white; }
+      .container { box-shadow: none; border: none; max-width: 100%; border-radius: 0; }
+      .btn, .actions { display: none !important; }
+      .screen { display: block !important; animation: none; }
+      #start-screen, #question-screen { display: none !important; }
+      #results-screen { display: block !important; }
+      .review-item { page-break-inside: avoid; break-inside: avoid; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div id="exam-view">
-      <div class="header">
-        <h1>${exam.title}</h1>
-        ${exam.description ? `<p>${exam.description}</p>` : ''}
+    <div class="header">
+      <h1 class="exam-title">${exam.title}</h1>
+      <p class="exam-desc">${exam.description || 'Interactive Offline Exam'}</p>
+    </div>
+    <div class="progress-bar-container">
+       <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div class="content">
+      
+      <!-- Start Screen -->
+      <div id="start-screen" class="screen active">
+        <div class="input-group">
+          <label for="student-name">Enter your full name to begin</label>
+          <input type="text" id="student-name" placeholder="John Doe" autocomplete="off">
+        </div>
+        <button class="btn btn-primary" style="width: 100%;" id="start-btn">Start Exam</button>
       </div>
 
-      <div class="progress-container">
-        <div class="progress-text">
-          Question <span id="current-q">1</span> of ${exam.questions.length}
+      <!-- Question Screen -->
+      <div id="question-screen" class="screen">
+        <div class="question-nav-info">
+           <span id="q-counter">Question 1 of X</span>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        
+        <div class="question-bento">
+           <div class="question-text" id="q-text">Loading question...</div>
+           <div class="options-grid" id="q-options">
+             <!-- Options injected via JS -->
+           </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-secondary" id="prev-btn">Previous</button>
+          <button class="btn btn-primary" id="next-btn">Next</button>
         </div>
       </div>
 
-      <div class="content">
-        <div id="student-section" class="student-info">
-          <label for="student-name">Your Name</label>
-          <input type="text" id="student-name" placeholder="Enter your name">
+      <!-- Results Screen -->
+      <div id="results-screen" class="screen">
+        <div class="results-hero" id="results-hero">
+           <div class="score-percentage" id="score-pct">0%</div>
+           <div class="score-details"><span id="score-points">0</span> out of <span id="total-points">0</span> correct</div>
+           <div style="margin-top: 8px; font-weight: 600; color: var(--text-muted);" id="student-display-name"></div>
         </div>
-
-        <div id="questions-section" style="display: none;">
-          ${exam.questions
-            .map(
-              (q, idx) => `
-            <div class="question-card" data-question-id="${q.id}">
-              <div class="question-header">
-                <div class="question-number">Q${idx + 1}</div>
-                <span class="question-type">${q.type === 'true-false' ? 'True/False' : 'Multiple Choice'}</span>
-                <p class="question-text">${q.text}</p>
-              </div>
-              <div class="options">
-                ${q.options
-                  .map(
-                    opt => `
-                  <div class="option">
-                    <input type="radio" id="${q.id}_${opt.id}" name="${q.id}" value="${opt.id}">
-                    <label for="${q.id}_${opt.id}">${opt.text}</label>
-                  </div>
-                `
-                  )
-                  .join('')}
-              </div>
-            </div>
-          `
-            )
-            .join('')}
-
-          <div class="button-group">
-            <button class="btn-secondary" id="btn-prev" onclick="previousQuestion()">Previous</button>
-            <button class="btn-primary" id="btn-next" onclick="nextQuestion()">Next</button>
-          </div>
+        
+        <h3 style="margin-bottom: 20px; font-size: 20px;">Review your answers:</h3>
+        <div class="review-list" id="review-list">
+           <!-- Review injected via JS -->
         </div>
-
-        <div id="results-section" class="results">
-          <div id="score-display" class="score-display"></div>
-          <div id="review-section" class="review-section"></div>
+        
+        <div class="actions" style="margin-top: 40px;">
+           <button class="btn btn-secondary" onclick="window.location.reload()">Take Again</button>
+           <button class="btn btn-primary" onclick="window.print()">Print Results</button>
         </div>
       </div>
+
     </div>
   </div>
 
   <script>
-    let currentQuestion = 0;
-    const studentNameInput = document.getElementById('student-name');
-    const questionsSection = document.getElementById('questions-section');
-    const resultsSection = document.getElementById('results-section');
-    const studentSection = document.getElementById('student-section');
-    const questions = ${JSON.stringify(exam.questions)};
-    let answers = {};
+    // --- Data Injected from React ---
+    const EXAM_DATA = ${JSON.stringify(exam)};
+    
+    // --- State ---
+    let studentName = '';
+    let currentQIndex = 0;
+    let answers = {}; // { questionId: selectedOptionId }
 
-    function startExam() {
-      if (!studentNameInput.value.trim()) {
-        alert('Please enter your name');
-        return;
-      }
-      studentSection.style.display = 'none';
-      questionsSection.style.display = 'block';
-      showQuestion(0);
+    // --- DOM Elements ---
+    const screens = {
+       start: document.getElementById('start-screen'),
+       question: document.getElementById('question-screen'),
+       results: document.getElementById('results-screen')
+    };
+    
+    const ui = {
+       nameInput: document.getElementById('student-name'),
+       startBtn: document.getElementById('start-btn'),
+       qCounter: document.getElementById('q-counter'),
+       qText: document.getElementById('q-text'),
+       qOptions: document.getElementById('q-options'),
+       prevBtn: document.getElementById('prev-btn'),
+       nextBtn: document.getElementById('next-btn'),
+       progressBar: document.getElementById('progress-bar')
+    };
+
+    // --- Logic ---
+    function switchScreen(screenName) {
+       Object.values(screens).forEach(s => s.classList.remove('active'));
+       screens[screenName].classList.add('active');
     }
 
-    function showQuestion(index) {
-      currentQuestion = index;
-      const q = questions[index];
-      
-      // Hide all questions
-      document.querySelectorAll('.question-card').forEach(card => {
-        card.style.display = 'none';
-      });
-      
-      // Show current question
-      document.querySelector(\`[data-question-id="\${q.id}"]\`).style.display = 'block';
-      
-      // Update progress
-      document.getElementById('current-q').textContent = index + 1;
-      const progress = ((index + 1) / questions.length) * 100;
-      document.getElementById('progress-fill').style.width = progress + '%';
-      
-      // Update buttons
-      document.getElementById('btn-prev').disabled = index === 0;
-      if (index === questions.length - 1) {
-        document.getElementById('btn-next').textContent = 'Submit Exam';
-        document.getElementById('btn-next').onclick = submitExam;
-      } else {
-        document.getElementById('btn-next').textContent = 'Next';
-        document.getElementById('btn-next').onclick = nextQuestion;
-      }
-
-      // Check for saved answer
-      if (answers[q.id]) {
-        document.getElementById(answers[q.id]).checked = true;
-      }
-    }
-
-    function previousQuestion() {
-      if (currentQuestion > 0) {
-        saveCurrentAnswer();
-        showQuestion(currentQuestion - 1);
-      }
-    }
-
-    function nextQuestion() {
-      if (currentQuestion < questions.length - 1) {
-        saveCurrentAnswer();
-        showQuestion(currentQuestion + 1);
-      }
-    }
-
-    function saveCurrentAnswer() {
-      const q = questions[currentQuestion];
-      const checked = document.querySelector(\`input[name="\${q.id}"]:checked\`);
-      if (checked) {
-        answers[q.id] = checked.id;
-      }
-    }
-
-    function submitExam() {
-      saveCurrentAnswer();
-      
-      let score = 0;
-      questions.forEach(q => {
-        if (answers[q.id] === q.id + '_' + q.correctAnswer) {
-          score++;
-        }
-      });
-      
-      const percentage = Math.round((score / questions.length) * 100);
-      const passed = percentage >= 50;
-      
-      questionsSection.style.display = 'none';
-      resultsSection.classList.add('active');
-      
-      const scoreDisplay = document.getElementById('score-display');
-      scoreDisplay.className = \`score-display \${passed ? '' : 'failed'}\`;
-      scoreDisplay.innerHTML = \`
-        <div class="score-number">\${percentage}%</div>
-        <div>\${score} out of \${questions.length} correct</div>
-        <div>\${passed ? '✓ Passed' : '✗ Not Passed (50% is the passing score)'}</div>
-      \`;
-      
-      const reviewSection = document.getElementById('review-section');
-      reviewSection.innerHTML = '<h2 style="font-size: 18px; margin-bottom: 20px;">Review Your Answers</h2>';
-      
-      questions.forEach((q, idx) => {
-        const selectedId = answers[q.id];
-        const correct = selectedId === q.id + '_' + q.correctAnswer;
-        const selectedOption = q.options.find(o => selectedId === q.id + '_' + o.id);
-        const correctOption = q.options.find(o => o.id === q.correctAnswer);
-        
-        const reviewDiv = document.createElement('div');
-        reviewDiv.className = \`review-question \${correct ? '' : 'incorrect'}\`;
-        reviewDiv.innerHTML = \`
-          <div class="review-question-text">
-            <span style="color: \${correct ? '#22c55e' : '#ef4444'}">
-              \${correct ? '✓' : '✗'}
-            </span>
-            Q\${idx + 1}: \${q.text}
-          </div>
-          <div class="review-answer">
-            <strong>Your answer:</strong> \${selectedOption ? selectedOption.text : 'Not answered'}
-          </div>
-          \${!correct ? \`<div class="review-answer"><strong style="color: #22c55e;">Correct answer:</strong> \${correctOption.text}</div>\` : ''}
-        \`;
-        reviewSection.appendChild(reviewDiv);
-      });
-      
-      const startBtn = document.createElement('button');
-      startBtn.className = 'btn-primary';
-      startBtn.style.marginTop = '40px';
-      startBtn.style.width = '100%';
-      startBtn.textContent = 'Refresh Page';
-      startBtn.onclick = () => location.reload();
-      reviewSection.appendChild(startBtn);
-    }
-
-    studentNameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') startExam();
+    ui.startBtn.addEventListener('click', () => {
+       const name = ui.nameInput.value.trim();
+       if (!name) {
+          alert('Please enter your name.');
+          ui.nameInput.focus();
+          return;
+       }
+       studentName = name;
+       switchScreen('question');
+       renderQuestion(0);
     });
 
-    const startBtn = document.createElement('button');
-    startBtn.className = 'btn-primary';
-    startBtn.style.marginTop = '20px';
-    startBtn.style.width = '100%';
-    startBtn.textContent = 'Start Exam';
-    startBtn.onclick = startExam;
-    studentSection.appendChild(startBtn);
+    ui.nameInput.addEventListener('keypress', (e) => {
+       if (e.key === 'Enter') ui.startBtn.click();
+    });
+
+    function renderQuestion(index) {
+       currentQIndex = index;
+       const q = EXAM_DATA.questions[index];
+       
+       // Update Header
+       ui.qCounter.textContent = \`Question \${index + 1} of \${EXAM_DATA.questions.length}\`;
+       const progress = ((index + 1) / EXAM_DATA.questions.length) * 100;
+       ui.progressBar.style.width = \`\${progress}%\`;
+       
+       // Update Question Text
+       ui.qText.textContent = q.text;
+       
+       // Render Options
+       ui.qOptions.innerHTML = '';
+       q.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn';
+          if (answers[q.id] === opt.id) btn.classList.add('selected');
+          
+          btn.innerHTML = \`
+             <div class="option-indicator"></div>
+             <span>\${opt.text}</span>
+          \`;
+          
+          btn.addEventListener('click', () => {
+             // Visual selection update
+             document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+             btn.classList.add('selected');
+             // Save answer
+             answers[q.id] = opt.id;
+          });
+          
+          ui.qOptions.appendChild(btn);
+       });
+       
+       // Update Nav Buttons
+       ui.prevBtn.classList.toggle('hidden', index === 0);
+       
+       if (index === EXAM_DATA.questions.length - 1) {
+          ui.nextBtn.textContent = 'Submit Exam';
+          ui.nextBtn.classList.remove('btn-secondary');
+          ui.nextBtn.classList.add('btn-primary');
+       } else {
+          ui.nextBtn.textContent = 'Next';
+       }
+    }
+
+    ui.prevBtn.addEventListener('click', () => {
+       if (currentQIndex > 0) renderQuestion(currentQIndex - 1);
+    });
+
+    ui.nextBtn.addEventListener('click', () => {
+       if (currentQIndex < EXAM_DATA.questions.length - 1) {
+          renderQuestion(currentQIndex + 1);
+       } else {
+          // Submit
+          const totalAnswered = Object.keys(answers).length;
+          if (totalAnswered < EXAM_DATA.questions.length) {
+             if (!confirm(\`You have only answered \${totalAnswered} of \${EXAM_DATA.questions.length} questions. Are you sure you want to submit?\`)) {
+                return;
+             }
+          }
+          calculateAndShowResults();
+       }
+    });
+
+    function calculateAndShowResults() {
+       let score = 0;
+       const reviewList = document.getElementById('review-list');
+       reviewList.innerHTML = '';
+
+       EXAM_DATA.questions.forEach((q, idx) => {
+          const selectedId = answers[q.id];
+          const isCorrect = selectedId === q.correctAnswer;
+          if (isCorrect) score++;
+
+          const selectedOpt = q.options.find(o => o.id === selectedId);
+          const correctOpt = q.options.find(o => o.id === q.correctAnswer);
+
+          const item = document.createElement('div');
+          item.className = \`review-item \${isCorrect ? 'correct' : 'incorrect'}\`;
+          
+          let html = \`
+             <div class="review-q">\${idx + 1}. \${q.text}</div>
+             <div class="review-ans"><strong>Your Answer:</strong> \${selectedOpt ? selectedOpt.text : '<i>Did not answer</i>'}</div>
+          \`;
+
+          if (!isCorrect) {
+             html += \`<div class="review-ans correct-ans"><strong>Correct Answer:</strong> \${correctOpt.text}</div>\`;
+          }
+          item.innerHTML = html;
+          reviewList.appendChild(item);
+       });
+
+       const percentage = Math.round((score / EXAM_DATA.questions.length) * 100);
+       const isPass = percentage >= 50;
+
+       document.getElementById('score-pct').textContent = \`\${percentage}%\`;
+       document.getElementById('score-points').textContent = score;
+       document.getElementById('total-points').textContent = EXAM_DATA.questions.length;
+       document.getElementById('student-display-name').textContent = \`Student: \${studentName}\`;
+
+       const hero = document.getElementById('results-hero');
+       hero.className = \`results-hero \${isPass ? 'pass' : 'fail'}\`;
+
+       // Hide progress bar on results
+       document.querySelector('.progress-bar-container').style.display = 'none';
+
+       switchScreen('results');
+    }
   </script>
 </body>
 </html>`;
 };
 
-export const generatePDF = (exam: Exam): Blob => {
-  const html = `
-    <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
-        h1 { color: #333; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
-        .question { margin: 20px 0; padding: 15px; border-left: 4px solid #3b82f6; background: #f9fafb; }
-        .question-text { font-weight: bold; margin-bottom: 10px; }
-        .option { margin: 8px 0 8px 20px; }
-        .correct { color: green; font-weight: bold; }
-      </style>
-    </head>
-    <body>
-      <h1>${exam.title}</h1>
-      ${exam.description ? `<p>${exam.description}</p>` : ''}
-      <hr>
-      ${exam.questions
-        .map(
-          (q, idx) => `
-        <div class="question">
-          <div class="question-text">Q${idx + 1}: ${q.text} (${q.type === 'true-false' ? 'True/False' : 'Multiple Choice'})</div>
-          ${q.options.map(opt => `
-            <div class="option">
-              ☐ ${opt.text}
-              ${opt.id === q.correctAnswer ? '<span class="correct"> [CORRECT ANSWER]</span>' : ''}
-            </div>
-          `).join('')}
-        </div>
-      `
-        )
-        .join('')}
-    </body>
-    </html>
-  `;
-
-  return new Blob([html], { type: 'text/html' });
-};
 
 export const downloadHTML = (exam: Exam) => {
   const html = generateStandalonHTML(exam);
@@ -550,14 +591,46 @@ export const downloadHTML = (exam: Exam) => {
   URL.revokeObjectURL(url);
 };
 
+
+/**
+ * Valid PDF generation bypassing corrupt blob generation.
+ * This opens the beautifully formatted HTML in a hidden print iframe,
+ * triggering the browser's native, high-quality "Save as PDF" / Print dialog.
+ */
 export const downloadPDF = (exam: Exam) => {
-  const pdf = generatePDF(exam);
-  const url = URL.createObjectURL(pdf);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${exam.title.replace(/\s+/g, '_')}_exam.pdf`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const html = generateStandalonHTML(exam);
+
+  // Create an invisible iframe
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+
+  // Write the modern HTML template into the iframe
+  const doc = iframe.contentWindow?.document;
+  if (doc) {
+    doc.open();
+    doc.write(html);
+
+    // Inject print instruction script
+    doc.write(`
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 500);
+        };
+      </script>
+    `);
+    doc.close();
+  }
+
+  // Cleanup: Remove the iframe after the print dialog resolves
+  setTimeout(() => {
+    document.body.removeChild(iframe);
+  }, 10000); // 10s wait before garbage collecting iframe
 };

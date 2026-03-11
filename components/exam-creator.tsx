@@ -5,9 +5,7 @@ import { Exam, Question, QuestionType, Option } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { Tabs } from '@/components/ui/tabs';
-import { X, Plus, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Plus, ChevronUp, ChevronDown, CheckCircle2, Circle, Copy } from 'lucide-react';
 import { storage } from '@/lib/storage';
 import { useRouter } from 'next/navigation';
 
@@ -29,15 +27,15 @@ export function ExamCreator({ initialExam, onSave }: ExamCreatorProps) {
       text: '',
       options: type === 'true-false'
         ? [
-            { id: 'true', text: 'True' },
-            { id: 'false', text: 'False' },
-          ]
+          { id: 'true', text: 'True' },
+          { id: 'false', text: 'False' },
+        ]
         : [
-            { id: `opt_1`, text: '' },
-            { id: `opt_2`, text: '' },
-            { id: `opt_3`, text: '' },
-            { id: `opt_4`, text: '' },
-          ],
+          { id: `opt_1`, text: '' },
+          { id: `opt_2`, text: '' },
+          { id: `opt_3`, text: '' },
+          { id: `opt_4`, text: '' },
+        ],
       correctAnswer: '',
       order: questions.length,
     };
@@ -52,6 +50,29 @@ export function ExamCreator({ initialExam, onSave }: ExamCreatorProps) {
     setQuestions(questions.filter(q => q.id !== questionId));
   };
 
+  const duplicateQuestion = (question: Question, index: number) => {
+    const newQuestion: Question = {
+      ...question,
+      id: `q_${Date.now()}`,
+      order: questions.length,
+      options: question.options.map(opt => ({ ...opt, id: `opt_${Date.now()}_${Math.random()}` }))
+    };
+    // Ensure correct answer is mapped across new option IDs
+    if (question.type === 'multiple-choice' && question.correctAnswer) {
+      const mappedCorrectAnswer = newQuestion.options[question.options.findIndex(o => o.id === question.correctAnswer)]?.id;
+      newQuestion.correctAnswer = mappedCorrectAnswer || '';
+    } else if (question.type === 'true-false') {
+      newQuestion.options = [
+        { id: 'true', text: 'True' },
+        { id: 'false', text: 'False' },
+      ];
+    }
+
+    const newQuestions = [...questions];
+    newQuestions.splice(index + 1, 0, newQuestion);
+    setQuestions(newQuestions.map((q, i) => ({ ...q, order: i })));
+  };
+
   const reorderQuestion = (index: number, direction: 'up' | 'down') => {
     const newQuestions = [...questions];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
@@ -64,9 +85,9 @@ export function ExamCreator({ initialExam, onSave }: ExamCreatorProps) {
     setQuestions(questions.map(q =>
       q.id === questionId
         ? {
-            ...q,
-            options: q.options.map(opt => opt.id === optionId ? { ...opt, text } : opt),
-          }
+          ...q,
+          options: q.options.map(opt => opt.id === optionId ? { ...opt, text } : opt),
+        }
         : q
     ));
   };
@@ -103,36 +124,48 @@ export function ExamCreator({ initialExam, onSave }: ExamCreatorProps) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="space-y-4">
+    <div className="w-full space-y-8 pb-32">
+      {/* Header Fields Bento */}
+      <div className="bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[32px] p-8 space-y-6 transition-all">
         <div>
-          <label className="text-sm font-semibold text-foreground mb-2 block">Exam Title</label>
+          <label className="text-sm font-semibold text-slate-700 ml-1 mb-2 block">Exam Title</label>
           <Input
             placeholder="e.g., Biology Final Exam"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="text-lg"
+            className="h-14 text-xl font-semibold bg-white/60 border-slate-200/60 rounded-2xl focus-visible:bg-white focus-visible:ring-indigo-500/20 shadow-sm"
           />
         </div>
         <div>
-          <label className="text-sm font-semibold text-foreground mb-2 block">Description (Optional)</label>
+          <label className="text-sm font-semibold text-slate-700 ml-1 mb-2 block">Description (Optional)</label>
           <Textarea
-            placeholder="Describe your exam..."
+            placeholder="Describe your exam instructions or contents..."
             value={description}
             onChange={e => setDescription(e.target.value)}
             rows={3}
+            className="bg-white/60 border-slate-200/60 rounded-2xl focus-visible:bg-white focus-visible:ring-indigo-500/20 shadow-sm resize-none text-base"
           />
         </div>
       </div>
 
       {/* Questions */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Questions</h2>
+      <div className="space-y-6">
         {questions.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">No questions yet. Add your first question below.</p>
-          </Card>
+          <div className="bg-white/40 backdrop-blur-md border border-dashed border-slate-300 rounded-[32px] p-12 text-center text-slate-500 flex flex-col items-center justify-center min-h-[200px]">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
+              <Plus className="w-8 h-8 text-slate-400" />
+            </div>
+            <p className="text-lg font-medium text-slate-700">No questions yet</p>
+            <p className="text-sm mt-1 mb-6">Start building your exam by adding a question below.</p>
+            <div className="flex gap-3">
+              <Button onClick={() => addQuestion('multiple-choice')} className="rounded-full bg-white text-slate-700 border border-slate-200 hover:bg-slate-50">
+                <Plus className="w-4 h-4 mr-2 text-indigo-500" /> Multiple Choice
+              </Button>
+              <Button onClick={() => addQuestion('true-false')} className="rounded-full bg-white text-slate-700 border border-slate-200 hover:bg-slate-50">
+                <Plus className="w-4 h-4 mr-2 text-violet-500" /> True/False
+              </Button>
+            </div>
+          </div>
         ) : (
           questions.map((question, index) => (
             <QuestionCard
@@ -142,6 +175,7 @@ export function ExamCreator({ initialExam, onSave }: ExamCreatorProps) {
               totalQuestions={questions.length}
               onUpdate={(updates) => updateQuestion(question.id, updates)}
               onDelete={() => deleteQuestion(question.id)}
+              onDuplicate={() => duplicateQuestion(question, index)}
               onReorder={(direction) => reorderQuestion(index, direction)}
               onOptionChange={(optionId, text) => updateOption(question.id, optionId, text)}
             />
@@ -149,25 +183,20 @@ export function ExamCreator({ initialExam, onSave }: ExamCreatorProps) {
         )}
       </div>
 
-      {/* Add Question Buttons */}
-      <div className="flex gap-3 justify-center">
-        <Button onClick={() => addQuestion('multiple-choice')} variant="outline" size="lg">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Multiple Choice
+      {/* Floating Action Bar */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 p-2 bg-white/80 backdrop-blur-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full w-max max-w-[95vw] overflow-x-auto">
+        <Button onClick={() => addQuestion('multiple-choice')} variant="ghost" className="rounded-full hover:bg-slate-100/50 text-slate-600 font-medium whitespace-nowrap">
+          <Plus className="w-4 h-4 mr-2 text-indigo-500" /> <span className="hidden sm:inline">Multiple Choice</span><span className="sm:hidden">Choice</span>
         </Button>
-        <Button onClick={() => addQuestion('true-false')} variant="outline" size="lg">
-          <Plus className="w-4 h-4 mr-2" />
-          Add True/False
+        <Button onClick={() => addQuestion('true-false')} variant="ghost" className="rounded-full hover:bg-slate-100/50 text-slate-600 font-medium whitespace-nowrap">
+          <Plus className="w-4 h-4 mr-2 text-violet-500" /> True/False
         </Button>
-      </div>
-
-      {/* Save Button */}
-      <div className="flex gap-3 justify-center pt-6">
-        <Button variant="outline" onClick={() => router.back()}>
+        <div className="w-px h-8 bg-slate-200 mx-1 shrink-0" />
+        <Button variant="ghost" onClick={() => router.back()} className="rounded-full text-slate-500 hover:text-slate-900 font-medium">
           Cancel
         </Button>
-        <Button onClick={handleSave} size="lg" className="px-8">
-          {initialExam ? 'Update' : 'Create'} Exam
+        <Button onClick={handleSave} className="rounded-full px-8 bg-slate-900 hover:bg-slate-800 text-white shadow-md font-medium whitespace-nowrap">
+          {initialExam ? 'Update' : 'Publish'} Exam
         </Button>
       </div>
     </div>
@@ -180,6 +209,7 @@ interface QuestionCardProps {
   totalQuestions: number;
   onUpdate: (updates: Partial<Question>) => void;
   onDelete: () => void;
+  onDuplicate: () => void;
   onReorder: (direction: 'up' | 'down') => void;
   onOptionChange: (optionId: string, text: string) => void;
 }
@@ -190,78 +220,104 @@ function QuestionCard({
   totalQuestions,
   onUpdate,
   onDelete,
+  onDuplicate,
   onReorder,
   onOptionChange,
 }: QuestionCardProps) {
   return (
-    <Card className="p-6 space-y-4">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-sm font-medium text-muted-foreground">Q{index + 1}</span>
-            <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded">
-              {question.type === 'true-false' ? 'True/False' : 'Multiple Choice'}
+    <div className="group relative bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_4px_20px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-[32px] p-6 md:p-8 transition-all duration-300">
+      <div className="flex flex-col md:flex-row items-start justify-between gap-4 mb-6">
+        <div className="flex-1 w-full">
+          <div className="flex items-center gap-3 mb-3 shrink-0">
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-sm font-bold text-slate-700">
+              {index + 1}
+            </span>
+            <span className="text-xs font-semibold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full border border-indigo-100/50 tracking-wide uppercase">
+              {question.type === 'true-false' ? 'True / False' : 'Multiple Choice'}
             </span>
           </div>
           <Textarea
-            placeholder="Enter question text..."
+            placeholder="Type your question here..."
             value={question.text}
             onChange={e => onUpdate({ text: e.target.value })}
             rows={2}
+            className="text-lg bg-slate-50 border-transparent hover:border-slate-200 focus-visible:bg-white focus-visible:border-indigo-200 focus-visible:ring-indigo-500/20 rounded-2xl resize-none shadow-sm transition-all"
           />
         </div>
-        <div className="flex gap-2 ml-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onReorder('up')}
-            disabled={index === 0}
-            title="Move up"
-          >
-            <ChevronUp className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onReorder('down')}
-            disabled={index === totalQuestions - 1}
-            title="Move down"
-          >
-            <ChevronDown className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onDelete} className="text-destructive">
-            <X className="w-4 h-4" />
-          </Button>
+
+        {/* Toolbar - Sticky on mobile, top right on desktop */}
+        <div className="flex md:flex-col gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity bg-slate-50 md:bg-transparent p-1 md:p-0 rounded-2xl w-full md:w-auto justify-end">
+          <div className="flex gap-1 md:flex-col items-center">
+            <Button variant="ghost" size="icon" onClick={() => onReorder('up')} disabled={index === 0} title="Move up" className="rounded-xl hover:bg-slate-200/50 text-slate-400 hover:text-slate-700 h-8 w-8">
+              <ChevronUp className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => onReorder('down')} disabled={index === totalQuestions - 1} title="Move down" className="rounded-xl hover:bg-slate-200/50 text-slate-400 hover:text-slate-700 h-8 w-8">
+              <ChevronDown className="w-5 h-5" />
+            </Button>
+          </div>
+          <div className="w-px h-6 md:w-6 md:h-px bg-slate-200 mx-2 md:my-2" />
+          <div className="flex gap-1 md:flex-col items-center">
+            <Button variant="ghost" size="icon" onClick={onDuplicate} title="Duplicate question" className="rounded-xl hover:bg-slate-200/50 text-slate-400 hover:text-slate-700 h-8 w-8">
+              <Copy className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={onDelete} title="Delete question" className="rounded-xl hover:bg-red-50 text-red-400 hover:text-red-600 h-8 w-8">
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Options */}
-      <div className="space-y-3 pl-4 border-l-2 border-secondary">
-        {question.options.map(option => (
-          <div key={option.id} className="flex items-center gap-3">
-            <input
-              type="radio"
-              id={`${question.id}_${option.id}`}
-              name={question.id}
-              checked={question.correctAnswer === option.id}
-              onChange={() => onUpdate({ correctAnswer: option.id })}
-              className="w-4 h-4 cursor-pointer"
-            />
-            {question.type === 'true-false' ? (
-              <label htmlFor={`${question.id}_${option.id}`} className="text-sm cursor-pointer flex-1">
-                {option.text}
-              </label>
-            ) : (
-              <Input
-                placeholder={`Option ${question.options.indexOf(option) + 1}`}
-                value={option.text}
-                onChange={e => onOptionChange(option.id, e.target.value)}
-                className="flex-1"
-              />
-            )}
-          </div>
-        ))}
+      {/* Options Container */}
+      <div className="pl-2 md:pl-11 space-y-3">
+        {question.options.map((option, optIdx) => {
+          const isSelected = question.correctAnswer === option.id;
+          return (
+            <div key={option.id} className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => onUpdate({ correctAnswer: option.id })}
+                className={`shrink-0 flex items-center justify-center w-6 h-6 rounded-full transition-all focus:outline-none focus:ring-4 focus:ring-indigo-500/20 ${isSelected
+                    ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/30'
+                    : 'bg-white border-2 border-slate-300 text-transparent hover:border-indigo-400'
+                  }`}
+                title="Mark as correct answer"
+              >
+                {isSelected && <CheckCircle2 className="w-4 h-4" />}
+                {!isSelected && <Circle className="w-4 h-4 opacity-0" />}
+              </button>
+
+              {question.type === 'true-false' ? (
+                <div
+                  onClick={() => onUpdate({ correctAnswer: option.id })}
+                  className={`flex-1 py-3 px-4 rounded-2xl border cursor-pointer transition-all ${isSelected
+                      ? 'bg-indigo-50/50 border-indigo-200 text-indigo-900 font-medium'
+                      : 'bg-slate-50 border-transparent hover:border-slate-200 text-slate-600 hover:text-slate-900'
+                    }`}
+                >
+                  {option.text}
+                </div>
+              ) : (
+                <div className="relative flex-1 group/input">
+                  <Input
+                    placeholder={`Option ${optIdx + 1}`}
+                    value={option.text}
+                    onChange={e => onOptionChange(option.id, e.target.value)}
+                    className={`h-12 pl-4 pr-10 rounded-2xl transition-all shadow-sm ${isSelected
+                        ? 'bg-indigo-50/50 border-indigo-200 text-indigo-900 font-medium focus-visible:ring-indigo-500/20'
+                        : 'bg-slate-50 border-transparent hover:border-slate-200 focus-visible:bg-white focus-visible:border-slate-300 text-slate-900'
+                      }`}
+                  />
+                  {isSelected && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-indigo-500 text-[10px] font-bold uppercase tracking-wider bg-white px-2 py-1 rounded-md shadow-sm border border-indigo-100">
+                      Correct
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-    </Card>
+    </div>
   );
 }

@@ -1,129 +1,149 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
-import { ArrowRight, BookOpen, Zap, BarChart3, FileText } from 'lucide-react';
+import { ArrowRight, BookOpen, Zap, BarChart3, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary">
-      {/* Navigation */}
-      <nav className="flex items-center justify-between p-6 md:p-8">
-        <h1 className="text-2xl font-bold">ExamMaster</h1>
+    <div className="min-h-screen bg-[#f8fafc] relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-500/20 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-violet-500/20 blur-[120px] pointer-events-none" />
+
+      {/* Navigation - Glassmorphic */}
+      <nav className="sticky top-0 z-50 flex items-center justify-between p-6 px-8 mx-auto max-w-7xl bg-white/50 backdrop-blur-xl border-b border-white/20">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <Zap className="w-5 h-5 text-white" />
+          </div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">ExamMaster</h1>
+        </div>
         <Link href="/dashboard">
-          <Button>Dashboard</Button>
+          <Button className="rounded-full px-6 shadow-sm hover:shadow-md transition-all duration-300 bg-white text-slate-900 border border-slate-200 hover:bg-slate-50">
+            Dashboard
+          </Button>
         </Link>
       </nav>
 
-      {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-6 md:px-8 py-20 space-y-20">
-        <div className="space-y-8 text-center">
-          <div className="space-y-4">
-            <h2 className="text-5xl md:text-6xl font-bold text-balance">
-              Create and Manage Exams Effortlessly
+      <main className="max-w-7xl mx-auto px-6 md:px-8 py-16 space-y-12 relative z-10">
+
+        {/* Bento Grid Container */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[minmax(180px,auto)]">
+
+          {/* Main Hero Bento (Spans 8 cols) */}
+          <div className="md:col-span-8 md:row-span-2 group relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[32px] p-10 flex flex-col justify-center items-start transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-indigo-100/50 text-indigo-700 text-sm font-medium border border-indigo-200/50">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+              </span>
+              ExamMaster 2.0 is highly optimized
+            </div>
+
+            <h2 className="text-5xl md:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1] mb-6">
+              Create and Manage <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500">
+                Online Exams
+              </span> Effortlessly.
             </h2>
-            <p className="text-xl text-muted-foreground text-pretty max-w-2xl mx-auto">
-              Build professional online exams with our Google Forms-like interface. Create, publish, and grade exams all in one place.
+            <p className="text-lg text-slate-500 mb-8 max-w-xl leading-relaxed">
+              Build professional exams with a clean, high-performance interface. Instant grading, modern analytics, and multiple export formats.
             </p>
+
+            <div className="flex flex-wrap gap-4">
+              <Link href="/create">
+                <Button size="lg" className="rounded-2xl px-8 h-14 bg-slate-900 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/20 transition-all hover:-translate-y-0.5 group cursor-pointer">
+                  Start Creating
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </div>
           </div>
 
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Link href="/create">
-              <Button size="lg" className="gap-2">
-                Create Exam <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Link href="/dashboard">
-              <Button size="lg" variant="outline">
-                View Dashboard
-              </Button>
-            </Link>
+          {/* Quick Stats/Graphic Bento (Spans 4 cols) */}
+          <div className="md:col-span-4 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-[32px] p-8 text-white shadow-lg shadow-indigo-500/20 flex flex-col justify-between overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:scale-110 transition-transform duration-700" />
+            <div className="relative z-10">
+              <BarChart3 className="w-10 h-10 text-white/80 mb-4" />
+              <h3 className="text-2xl font-semibold mb-2">Detailed Analytics</h3>
+              <p className="text-indigo-100 leading-relaxed text-sm">
+                Track student performance with comprehensive, real-time statistics and score distributions.
+              </p>
+            </div>
+            <div className="relative z-10 mt-8 pt-6 border-t border-white/20 flex justify-between items-end">
+              <div>
+                <div className="text-4xl font-bold tracking-tight">100%</div>
+                <div className="text-indigo-100 text-sm font-medium mt-1">Accuracy</div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <FeatureCard
-            icon={<BookOpen className="w-8 h-8" />}
-            title="Easy Exam Creation"
-            description="Create exams with True/False and Multiple Choice questions. Add, edit, and delete questions with a single click."
-          />
-          <FeatureCard
-            icon={<FileText className="w-8 h-8" />}
-            title="Multiple Export Formats"
-            description="Export your exams as standalone HTML files or PDFs. Share with students directly without any setup needed."
-          />
-          <FeatureCard
-            icon={<Zap className="w-8 h-8" />}
-            title="Instant Grading"
-            description="Automatic grading system that evaluates student answers instantly and provides detailed feedback."
-          />
-          <FeatureCard
-            icon={<BarChart3 className="w-8 h-8" />}
-            title="Detailed Analytics"
-            description="Track student performance with comprehensive statistics, score distributions, and pass rates."
-          />
-        </div>
+          {/* Features Bento Cells (3 cells, 4 cols each) */}
+          {/* <FeatureBento
+            icon={<BookOpen className="w-6 h-6 text-emerald-500" />}
+            title="Clean Editor"
+            desc="Distraction-free exam creation with smart keyboard shortcuts."
+            bg="bg-emerald-500/10"
+          /> */}
+          {/* <FeatureBento
+            icon={<Zap className="w-6 h-6 text-amber-500" />}
+            title="Lightning Fast"
+            desc="Virtualized DOM ensures 60fps performance on massive exams."
+            bg="bg-amber-500/10"
+          /> */}
+          {/* <FeatureBento
+            icon={<FileText className="w-6 h-6 text-pink-500" />}
+            title="Multiple Exports"
+            desc="One-click export to standalone HTML or universally accessible PDF."
+            bg="bg-pink-500/10"
+          /> */}
 
-        {/* How It Works */}
-        <div className="space-y-8">
-          <h3 className="text-3xl font-bold text-center">How It Works</h3>
-          <div className="grid md:grid-cols-4 gap-4">
-            <StepCard step={1} title="Create" description="Design your exam with custom questions" />
-            <StepCard step={2} title="Publish" description="Export as HTML or PDF to share" />
-            <StepCard step={3} title="Share" description="Students take the exam online or offline" />
-            <StepCard step={4} title="Analyze" description="View results and statistics instantly" />
+          {/* How It Works Wide Bento (Spans 12 cols) */}
+          <div className="md:col-span-12 bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[32px] p-10 flex flex-col md:flex-row items-center gap-12">
+            <div className="md:w-1/3 space-y-4">
+              <h3 className="text-3xl font-bold tracking-tight text-slate-900">Seamless Workflow</h3>
+              <p className="text-slate-500 leading-relaxed">
+                We've engineered every step to minimize friction. From drafting to publishing, experience the modern standard of educational tools.
+              </p>
+            </div>
+            <div className="md:w-2/3 grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
+              <StepItem num="1" title="Draft" subtitle="In the editor" />
+              <StepItem num="2" title="Publish" subtitle="To the web" />
+              <StepItem num="3" title="Distribute" subtitle="To students" />
+              <StepItem num="4" title="Analyze" subtitle="The results" />
+            </div>
           </div>
-        </div>
 
-        {/* CTA Section */}
-        <Card className="p-12 text-center space-y-4 bg-gradient-to-r from-primary/10 to-secondary">
-          <h3 className="text-2xl font-bold">Ready to Create Your First Exam?</h3>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Get started in seconds. No credit card required.
-          </p>
-          <Link href="/create">
-            <Button size="lg">Start Creating Now</Button>
-          </Link>
-        </Card>
+        </div>
       </main>
     </div>
   );
 }
 
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
+function FeatureBento({ icon, title, desc, bg }: { icon: React.ReactNode, title: string, desc: string, bg: string }) {
   return (
-    <Card className="p-6 space-y-3 hover:border-primary/50 transition-colors">
-      <div className="text-primary">{icon}</div>
-      <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="text-muted-foreground text-sm">{description}</p>
-    </Card>
-  );
+    <div className="md:col-span-4 bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_4px_20px_rgb(0,0,0,0.03)] rounded-[32px] p-8 hover:-translate-y-1 transition-transform duration-300">
+      <div className={`w-14 h-14 ${bg} rounded-2xl flex items-center justify-center mb-6`}>
+        {icon}
+      </div>
+      <h3 className="text-xl font-semibold text-slate-900 mb-3">{title}</h3>
+      <p className="text-slate-500 leading-relaxed text-sm">
+        {desc}
+      </p>
+    </div>
+  )
 }
 
-function StepCard({
-  step,
-  title,
-  description,
-}: {
-  step: number;
-  title: string;
-  description: string;
-}) {
+function StepItem({ num, title, subtitle }: { num: string, title: string, subtitle: string }) {
   return (
-    <div className="space-y-3 text-center">
-      <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-lg font-bold mx-auto">
-        {step}
+    <div className="flex flex-col gap-3">
+      <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 shadow-sm">
+        {num}
       </div>
-      <h4 className="font-semibold">{title}</h4>
-      <p className="text-sm text-muted-foreground">{description}</p>
+      <div>
+        <h4 className="font-semibold text-slate-900">{title}</h4>
+        <div className="text-sm text-slate-500">{subtitle}</div>
+      </div>
     </div>
-  );
+  )
 }
